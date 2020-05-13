@@ -1,4 +1,7 @@
+import time
 import wave
+import cairo
+import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
 from .log_config import log, config
@@ -74,3 +77,18 @@ def resample(ts, values, n_samples):
     assert np.all(np.diff(ts) >= 0)
     ts = normalize(ts)
     return np.interp(np.linspace(0.0, 1.0, n_samples), ts, values)
+
+
+def drawing(width, height):
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+    ctx = cairo.Context(surface)
+    ctx.rectangle(0, 0, width, height)
+    ctx.set_source_rgba(255, 255, 255, 255)
+    ctx.fill()
+    ctx.stroke()
+    return surface, ctx
+
+def output(surface):
+    filename = f"charts/{int(time.time())}.png"
+    surface.write_to_png(filename)
+    subprocess.call(["open", filename])

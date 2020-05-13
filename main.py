@@ -2,61 +2,58 @@
 
 import time
 import math
-import subprocess
-import cairo
 from util import *
+
+CYCLE = 2.0 #* 6
 
 filename = "200424_mono_.wav"
 # filename = "robin_chat_sample_11k_16_mono.wav"
+filename = "200502_mono.wav"
+# filename = "urgency.wav"
 sound = Sound(filename)
-
 # sound.plot()
 # exit()
 
-log.info("Computing spectrogram...")
+n = int(CYCLE * sound.rate)
+cycles = [np.array(sound.signal[i:i + n]) for i in range(0, len(sound.signal), n)]
 
-block_size = 512
-block_overlap = block_size / 2 # power of two, default is 128
+cycles = cycles[:10]
 
-spectrum, freqs, ts, image = plt.specgram(sound.signal, NFFT=block_size, Fs=sound.rate, noverlap=block_overlap)
+width, height = 1080*4, 1080*4
+# width, height = len(freqs) * 8, len(freqs) * 8
+surface, ctx = drawing(width, height)
 
-log.info(f"--> freq bins {len(freqs)}")
-log.info(f"--> time columns {len(ts)}")
+ring_size = (width - 50) / (2 * len(cycles))
+print("ring_size", ring_size)
 
-log.info("Drawing...")
+for c, cycle in enumerate(cycles):
 
-freqs = freqs[:-90] # chop off the top
+    log.info(f"Cycle {c}")
+    log.info("Computing spectrogram...")
 
-width, height = 1080, 1080
-width, height = len(freqs) * 8, len(freqs) * 8
-surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
-ctx = cairo.Context(surface)
-ctx.rectangle(0, 0, width, height)
-ctx.set_source_rgba(255, 255, 255, 255)
-ctx.fill()
-ctx.stroke()
+    spectrum, freqs, ts, image = plt.specgram(cycle, NFFT=512, Fs=sound.rate, noverlap=512/2)
 
-THRESHOLD = .5
-for freq_n in range(len(freqs)):
-    for t_n in range(len(ts)):
+    log.info(f"--> freq bins {len(freqs)}")
+    log.info(f"--> time columns {len(ts)}")
 
-        v = spectrum[freq_n][t_n]
-        v = 0 if v > THRESHOLD else 255
-        r = 1.0 - (freq_n / len(freqs))
-        # r = freq_n / len(freqs)
-        r *= ((width-50)/2) - 1
-        r += 1
-        a1 = (t_n / len(ts)) * 360
-        a2 = a1 + (360 / len(ts))
-        # ctx.line((x * pixel_width) / ctx.width, (y * pixel_height) / ctx.height, ((x * pixel_width) + pixel_width) / ctx.width, (y * pixel_height) / ctx.height, stroke=(v, v, v, 1.), thickness=pixel_height)
-        # ctx.arc(.5, .5, r, r, d, d+1, stroke=(0.0, 0.0, 0.0, .1), thickness=5.0)
-        ctx.set_source_rgba(v, v, v, 255)
-        ctx.arc(width/2, height/2, r, math.radians(a1), math.radians(a2))
-        ctx.stroke()
+    log.info("Drawing...")
 
+    freqs = freqs[:-90] # chop off the top
+
+    THRESHOLD = .5
+    for freq_n in range(len(freqs)):
+        for t_n in range(len(ts)):
+            v = spectrum[freq_n][t_n]
+            v = 0 if v > THRESHOLD else 255
+            r = 1.0 - (freq_n / len(freqs))
+            r *= ring_size
+            r += ring_size * c
+            a1 = (t_n / len(ts)) * 360
+            a2 = a1 + (360 / len(ts))
+            ctx.set_source_rgba(v, v, v, 255-(v*255))
+            ctx.arc(width/2, height/2, r, math.radians(a1), math.radians(a2))
+            ctx.stroke()
 
 log.info("--> done")
-ctx.stroke()
-filename = f"charts/{int(time.time())}.png"
-surface.write_to_png(filename)
-subprocess.call(["open", filename])
+
+output(surface)
