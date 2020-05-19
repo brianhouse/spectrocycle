@@ -1,11 +1,12 @@
 import time
+import random
 import wave
 import cairo
 import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
 from .log_config import log, config
-
+from colors import colors
 
 class Sound(object):
 
@@ -83,7 +84,8 @@ def drawing(width, height):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
     ctx = cairo.Context(surface)
     ctx.rectangle(0, 0, width, height)
-    ctx.set_source_rgba(255, 255, 255, 255)
+    color = random.choice(colors)
+    ctx.set_source_rgba(*color)
     ctx.fill()
     ctx.stroke()
     return surface, ctx
