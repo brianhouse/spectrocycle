@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 
+import sys
 import time
 import math
 from util import *
 
-CYCLE = 2.0 #* 6
-CYCLES = 10
+CYCLE = 1.8 #* 6
+CYCLES = 5#3
 CHOP = True
-THRESHOLD = .125
+THRESHOLD = .4
 
-# filename = "200424_mono_.wav"
-# filename = "robin_chat_sample_11k_16_mono.wav"
-# filename = "200502_mono.wav"
-filename = "200519_mono.wav"
-# filename = "urgency.wav"
+if len(sys.argv) < 2:
+    print("[path]")
+    exit()
+
+filename = sys.argv[1]
 sound = Sound(filename)
-# sound.plot()
-# exit()
 
 n = int(CYCLE * sound.rate)
 cycles = [np.array(sound.signal[i:i + n]) for i in range(0, len(sound.signal), n)]
@@ -45,10 +44,14 @@ for c, cycle in enumerate(cycles):
     if CHOP:
         freqs = freqs[:-90] # chop off the top
 
+    max_v = 0
     for freq_n in range(len(freqs)):
         for t_n in range(len(ts)):
             v = spectrum[freq_n][t_n]
-            v = 0 if v > THRESHOLD else 255
+            if v > 10:
+                v = 10
+            v /= 10                     ###  what should this scale be?
+            v = 0 if v > THRESHOLD else 1
             r = 1.0 - (freq_n / len(freqs))
             r *= ring_size
             r += ring_size * c
