@@ -6,7 +6,7 @@ import math
 from util import *
 
 CYCLE = 1.8 #* 6
-CYCLES = 5#3
+CYCLES = 33
 CHOP = True
 THRESHOLD = .4
 
@@ -34,7 +34,9 @@ for c, cycle in enumerate(cycles):
     log.info(f"Cycle {c}")
     log.info("Computing spectrogram...")
 
-    spectrum, freqs, ts, image = plt.specgram(cycle, NFFT=512, Fs=sound.rate, noverlap=512/2)
+    spectrum, freqs, ts, image = plt.specgram(cycle, NFFT=512, Fs=sound.rate, noverlap=512/2, mode="psd", scale="dB")
+    spectrum = np.log10(spectrum)
+    spectrum = normalize(spectrum)
 
     log.info(f"--> freq bins {len(freqs)}")
     log.info(f"--> time columns {len(ts)}")
@@ -48,16 +50,12 @@ for c, cycle in enumerate(cycles):
     for freq_n in range(len(freqs)):
         for t_n in range(len(ts)):
             v = spectrum[freq_n][t_n]
-            if v > 10:
-                v = 10
-            v /= 10                     ###  what should this scale be?
-            v = 0 if v > THRESHOLD else 1
             r = 1.0 - (freq_n / len(freqs))
             r *= ring_size
             r += ring_size * c
             a1 = (t_n / len(ts)) * 360
             a2 = a1 + (360 / len(ts))
-            color[3] = 255-(v*255)
+            color[3] = 1 if v > THRESHOLD else 0
             ctx.set_source_rgba(*color)
             ctx.arc(width/2, height/2, r, math.radians(a1), math.radians(a2))
             ctx.stroke()
