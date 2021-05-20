@@ -5,10 +5,11 @@ import time
 import math
 from util import *
 
-CYCLE = 1.8 #* 6
-CYCLES = 33
+CYCLE = 1 + 1/3 #* 6
+CYCLE = 1.33
+MAX_CYCLES = 45
 CHOP = True
-THRESHOLD = .4
+THRESHOLD = .6
 
 if len(sys.argv) < 2:
     print("[path]")
@@ -19,8 +20,7 @@ sound = Sound(filename)
 
 n = int(CYCLE * sound.rate)
 cycles = [np.array(sound.signal[i:i + n]) for i in range(0, len(sound.signal), n)]
-
-cycles = cycles[:CYCLES]
+cycles = cycles[:MAX_CYCLES]
 
 width, height = 1080*4, 1080*4
 # width, height = len(freqs) * 8, len(freqs) * 8
@@ -56,6 +56,7 @@ for c, cycle in enumerate(cycles):
             a1 = (t_n / len(ts)) * 360
             a2 = a1 + (360 / len(ts))
             color[3] = 1 if v > THRESHOLD else 0
+            # color[3] = v
             ctx.set_source_rgba(*color)
             ctx.arc(width/2, height/2, r, math.radians(a1), math.radians(a2))
             ctx.stroke()
