@@ -8,15 +8,16 @@ from util import *
 CYCLE = 1 + 1/3 #* 6
 CYCLE = 1.33
 MAX_CYCLES = 45
-MAX_CYCLES = 1
+MAX_CYCLES = 100
 CHOP = True
 THRESHOLD = .6
 
-if len(sys.argv) < 2:
-    print("[path]")
-    exit()
+# if len(sys.argv) < 2:
+#     print("[path]")
+#     exit()
+# filename = sys.argv[1]
 
-filename = sys.argv[1]
+filename = "/Users/house/Desktop/open_project/take2/one_day_mix_bounce-48-16.wav"
 sound = Sound(filename)
 
 n = int(CYCLE * sound.rate)

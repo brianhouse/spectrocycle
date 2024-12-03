@@ -17,7 +17,7 @@ class Sound(object):
         self.bits = self.wf.getsampwidth() * 8
         if self.bits != 16:
             raise NotImplementedError
-        self.signal = np.fromstring(self.wf.readframes(-1), 'Int16') # signed 16-bit samples
+        self.signal = np.fromstring(self.wf.readframes(-1), np.int16) # signed 16-bit samples
         self.wf.rewind()
         self.rate = self.wf.getframerate()
         self.samples = len(self.signal)

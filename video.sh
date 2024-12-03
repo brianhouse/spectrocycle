@@ -1,1 +1,1 @@
-ffmpeg -loop 1 -i /Users/house/Studio/spectrometer/charts/1594666644.png -i /Users/house/Studio/firefly/micros/200713.wav -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf scale=1080:1080 -shortest /Users/house/Studio/firefly/micros/200713.mp4
+ffmpeg -loop 1 -i /Users/house/Studio/spectrometer/charts/1630617687.png -i /Users/house/Studio/firefly/micros/210902.wav -c:v libx264 -tune stillimage -c:a aac -b:a 192k -pix_fmt yuv420p -vf scale=1080:1080 -shortest /Users/house/Studio/firefly/micros/210902.mp4
