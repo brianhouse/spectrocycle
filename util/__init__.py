@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from .log_config import log, config
 from colors import colors
 
+
 class Sound(object):
 
     def __init__(self, path):
@@ -17,7 +18,8 @@ class Sound(object):
         self.bits = self.wf.getsampwidth() * 8
         if self.bits != 16:
             raise NotImplementedError
-        self.signal = np.fromstring(self.wf.readframes(-1), np.int16) # signed 16-bit samples
+        # signed 16-bit samples
+        self.signal = np.fromstring(self.wf.readframes(-1), np.int16)
         self.wf.rewind()
         self.rate = self.wf.getframerate()
         self.samples = len(self.signal)
@@ -26,7 +28,6 @@ class Sound(object):
         log.info(f"--> rate {self.rate}")
         log.info(f"--> samples {self.samples}")
         log.info(f"--> duration {self.duration:.2f}s")
-
 
     def plot(self):
 
@@ -44,13 +45,13 @@ class Sound(object):
         # show amplitude domain
         plt.subplot(2, 1, 1)
         plt.plot(self.signal, color=(1., 0., 0.))
-        plt.axis([0.0, self.duration * self.rate, 0-(2**self.bits/2), 2**self.bits/2]) # go to bitrate
+        plt.axis([0.0, self.duration * self.rate, 0 - (2**self.bits / 2), 2**self.bits/2]) # go to bitrate
 
         # show spectrogram
         plt.subplot(2, 1, 2)
-        block_overlap = block_size / 2 # power of two, default is 128
+        block_overlap = block_size / 2  # power of two, default is 128
         spectrum, freqs, ts, image = plt.specgram(self.signal, NFFT=block_size, Fs=self.rate, noverlap=block_overlap)
-        plt.axis([0.0, self.duration, 0, self.rate/2])
+        plt.axis([0.0, self.duration, 0, self.rate / 2])
 
         fig = plt.gcf()
         fig.canvas.set_window_title(self.path)
@@ -89,6 +90,7 @@ def drawing(width, height):
     ctx.fill()
     ctx.stroke()
     return surface, ctx
+
 
 def output(surface):
     filename = f"charts/{int(time.time())}.png"

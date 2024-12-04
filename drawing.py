@@ -30,8 +30,8 @@ import colorsys, math, time, subprocess, os
 import cairo
 
 class Context(object):
-    """The drawing context"""    
-       
+    """The drawing context"""
+
     def __init__(self, width=2000, height=500, background=(1., 1., 1., 1.), hsv=False, flip=True, relative=True, margin=0):
         self._width = float(width)
         self._height = float(height)
@@ -76,17 +76,17 @@ class Context(object):
     def width(self):
         """Return the width of the drawing context."""
         return self._width
-        
+
     @property
     def height(self):
-        """Return the height of the drawing context."""        
-        return self._height    
+        """Return the height of the drawing context."""
+        return self._height
 
     def line(self, x1, y1=None, x2=None, y2=None, stroke=(0.0, 0.0, 0.0, 1.0), thickness=1.0, dash=None):
-        """Draw a line from x1,y1 to x2,y2, or between all points (as x,y pairs) in a list."""        
+        """Draw a line from x1,y1 to x2,y2, or between all points (as x,y pairs) in a list."""
         stroke = self._handle_color(stroke)
         self._ctx.set_source_rgba(*stroke)
-        self._ctx.set_line_cap(cairo.LINE_CAP_SQUARE)  
+        self._ctx.set_line_cap(cairo.LINE_CAP_SQUARE)
         self._ctx.set_line_join(cairo.LINE_JOIN_MITER)
         if dash is not None:
             self._ctx.set_dash(dash)
@@ -101,14 +101,14 @@ class Context(object):
             self._ctx.scale(1.0 / self.width, 1.0 / self.height)
         self._ctx.set_line_width(thickness)
         self._ctx.stroke()
-        self._ctx.restore()                
+        self._ctx.restore()
         self._ctx.save()
 
     def plot(self, signal, stroke=(0.0, 0.0, 0.0, 1.0), thickness=1.0):
         self.line([(float(i) / len(signal), sample) for (i, sample) in enumerate(signal)], stroke=stroke, thickness=thickness)                
 
     def curve(self, x1, y1, xc, yc, x2, y2, stroke=(0.0, 0.0, 0.0, 1.0), thickness=1.0):
-        """Draw a curve from x1,y1 to x2,y2 with control point xc, yc"""  
+        """Draw a curve from x1,y1 to x2,y2 with control point xc, yc"""
         x1 = self._mx(x1)
         y1 = self._my(y1)
         xc = self._mx(xc)
@@ -117,37 +117,37 @@ class Context(object):
         y2 = self._my(y2)
         stroke = self._handle_color(stroke)
         self._ctx.set_source_rgba(*stroke)
-        self._ctx.set_line_cap(cairo.LINE_CAP_SQUARE)        
+        self._ctx.set_line_cap(cairo.LINE_CAP_SQUARE)
         self._ctx.move_to(x1, y1)
         self._ctx.curve_to(xc, yc, xc, yc, x2, y2)
         if self.relative:
             self._ctx.scale(1.0 / self.width, 1.0 / self.height)
         self._ctx.set_line_width(thickness)
         self._ctx.stroke()
-        self._ctx.restore()                
-        self._ctx.save()  
+        self._ctx.restore()
+        self._ctx.save()
 
     def rect(self, x, y, width, height, stroke=(0.0, 0.0, 0.0, 1.0), thickness=1.0, fill=None):
-        """Draw a rectangle"""      
+        """Draw a rectangle"""
         stroke = self._handle_color(stroke)
-        fill = self._handle_color(fill)        
-        self._ctx.set_line_cap(cairo.LINE_CAP_SQUARE)        
+        fill = self._handle_color(fill)
+        self._ctx.set_line_cap(cairo.LINE_CAP_SQUARE)
         self._ctx.rectangle(self._mx(x), self._my(y), self._mx(width), self._my(height))
         if self.relative:
             self._ctx.scale(1.0 / self.width, 1.0 / self.height)
         self._ctx.set_line_width(thickness)
         if fill is not None:
             self._ctx.set_source_rgba(*fill)
-            self._ctx.fill_preserve()     
-        self._ctx.set_source_rgba(*stroke)               
+            self._ctx.fill_preserve()
+        self._ctx.set_source_rgba(*stroke)
         self._ctx.stroke()
-        self._ctx.restore()                
-        self._ctx.save()        
+        self._ctx.restore()
+        self._ctx.save()
 
     def arc(self, center_x, center_y, radius_x=None, radius_y=None, start=0, end=360, stroke=(0.0, 0.0, 0.0, 1.0), thickness=1.0, fill=None):
         """ Draw an arc / ellipse / circle / pieslice. 'start' and 'end' are angles in degrees; 0 is 3:00 and degrees move clockwise.
             Specify both radius_x and radius_y to make ellipses; fill to make a pie slice.
-        """        
+        """
         stroke = self._handle_color(stroke)
         fill = self._handle_color(fill)
         if radius_x is None and radius_y is None:
@@ -166,8 +166,7 @@ class Context(object):
         center_y = self._my(center_y)
 
         self._ctx.save()
-        self._ctx.translate(center_x, center_y)  
-        self._ctx.scale(radius_x, radius_y)
+        self._ctx.translate(center_x, center_y)        self._ctx.scale(radius_x, radius_y)
         self._ctx.arc(0.0, 0.0, 1.0, start, math.radians(end))
 
         if self.relative:
@@ -176,34 +175,31 @@ class Context(object):
         if fill is not None:
             self._ctx.set_source_rgba(*fill)
             self._ctx.fill_preserve()
-        self._ctx.set_line_width(thickness)            
-        self._ctx.set_source_rgba(*stroke) 
-
-        self._ctx.stroke()            
-        self._ctx.restore()                
+        self._ctx.set_line_width(thickness)
+        self._ctx.set_source_rgba(*stroke)
+        self._ctx.stroke()
+        self._ctx.restore()
         self._ctx.save()
-
 
     def label(self, x, y, text, stroke=(0., 0., 0., 1.), font="Monaco", size=12):
         x = self._mx(x)
-        y = self._my(y)        
+        y = self._my(y)
         stroke = self._handle_color(stroke)
         self._ctx.set_source_rgba(*stroke)
         self._ctx.select_font_face(font, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         self._ctx.set_font_size(size)
-        if self.relative: 
-            self._ctx.scale(1.0 / self.width, 1.0 / self.height)    
+        if self.relative:
+            self._ctx.scale(1.0 / self.width, 1.0 / self.height)
             x *= self.width
-            y *= self.height            
+            y *= self.height
         if self.flip:
             self._ctx.scale(1, -1)
             self._ctx.translate(0, -self.height)
             y = self.height - y
-        self._ctx.move_to(x, y) 
-        self._ctx.show_text(text)   
-        self._ctx.restore()                
+        self._ctx.move_to(x, y)
+        self._ctx.show_text(text)
+        self._ctx.restore()
         self._ctx.save()
-
 
     def image(self, filename, x=0, y=None):
         if y is None:
@@ -212,25 +208,24 @@ class Context(object):
             else:
                 y = self.height if self.flip else 0
         image = cairo.ImageSurface.create_from_png(filename)
-        if self.relative: 
-            self._ctx.scale(1.0 / self.width, 1.0 / self.height)    
+        if self.relative:
+            self._ctx.scale(1.0 / self.width, 1.0 / self.height)
             x *= self.width
-            y *= self.height            
+            y *= self.height
         if self.flip:
             self._ctx.scale(1, -1)
             self._ctx.translate(0, -self.height)
-            y = self.height - y        
+            y = self.height - y
         self._ctx.set_source_surface(image, x, y)
-        self._ctx.paint()        
-        self._ctx.restore()                
+        self._ctx.paint()
+        self._ctx.restore()
         self._ctx.save()
 
-
     def output(self, filename=None, open_file=True):
-        self._ctx.stroke() # commit to surface
+        self._ctx.stroke()  # commit to surface
         if filename is None or '.' not in filename:
             if filename is None:
-                filename = '' 
+                filename = ''
             else:
                 if not os.path.isdir(filename):
                     os.makedirs(filename)
@@ -238,4 +233,3 @@ class Context(object):
         self._surface.write_to_png(filename) # write to file
         if open_file:
             subprocess.call(["open", filename])
-
