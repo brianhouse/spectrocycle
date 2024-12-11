@@ -4,3 +4,4 @@ __pycache__
 charts/*
 *.mp4
 *.mov
+venv

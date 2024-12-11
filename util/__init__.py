@@ -86,6 +86,7 @@ def drawing(width, height):
     ctx = cairo.Context(surface)
     ctx.rectangle(0, 0, width, height)
     color = random.choice(colors)
+    color = 1., 1., 1., 1.  ##
     ctx.set_source_rgba(*color)
     ctx.fill()
     ctx.stroke()
